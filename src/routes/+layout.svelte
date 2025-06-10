@@ -1,10 +1,21 @@
 <script>
-  import { onMount } from 'svelte';
-  import { afterNavigate } from '$app/navigation';
-  import '../app.css';
-  
- 
- 
+  import { onMount } from "svelte";
+  import { afterNavigate } from "$app/navigation";
+  import "../app.css";
+  import { base } from "$app/paths";
+
+  //REGISTRO DEL SERVICE WORKER
+  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register(`${base}/sw.js`)
+      .then((registration) => {
+        console.log("Service Worker registrado:", registration);
+      })
+      .catch((error) => {
+        console.error("Error al registrar Service Worker:", error);
+      });
+  }
+
   // Opcional: volver arriba tras navegación
   onMount(() => {
     afterNavigate(() => window.scrollTo(0, 0));
@@ -29,11 +40,11 @@
       </div>
     </nav>
   </header>
-  
+
   <main class="main-content">
     <slot />
   </main>
-  
+
   <footer class="app-footer">
     <div class="footer-content">
       <div class="footer-left">
@@ -67,7 +78,8 @@
     display: flex;
     flex-direction: column;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
   }
 
   /* Header */
@@ -198,7 +210,7 @@
   }
 
   .footer-icon.binary {
-    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-family: "Monaco", "Menlo", "Consolas", monospace;
     font-size: 0.75rem;
   }
 

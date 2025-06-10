@@ -1,0 +1,78 @@
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+
+const isProd = process.env.NODE_ENV === 'production';
+const basePath = isProd ? '/proyecto-interfaces' : '';
+
+export default defineConfig({
+  base: basePath, // Mover base aquí fuera del plugin
+  plugins: [
+    sveltekit(),
+    SvelteKitPWA({
+      manifest: {
+        name: 'Mi App de Cálculo y Gráficos',
+        short_name: 'Calculadora',
+        description: 'Visualizador de Superficies 3D y Cálculos con SvelteKit',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        start_url: basePath + '/',
+        scope: basePath + '/',
+        display: 'standalone',
+        icons: [
+          {
+            src: basePath + '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: basePath + '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: basePath + '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
+        // Para sitios estáticos, usar null en lugar de '/'
+        navigateFallback: isProd ? null : '/',
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
+              }
+            }
+          },
+          {
+            urlPattern: ({ request }) => request.destination === 'document',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages-cache',
+              networkTimeoutSeconds: 3
+            }
+          }
+        ],
+        cleanupOutdatedCaches: true,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
+      },
+      injectRegister: 'auto',
+      registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      },
+      strategies: 'generateSW'
+    })
+  ]
+});

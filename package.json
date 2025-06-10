@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"generate-cache": "node generate-cache-list.cjs",
+		"build": "vite build && npm run generate-cache",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''"
 	},

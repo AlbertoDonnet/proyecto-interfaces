@@ -8,13 +8,20 @@ const config = {
     adapter: adapter({
       pages: 'build',
       assets: 'build',
-      fallback: '404.html',
+      fallback: 'index.html', // Necesario para el manejo de rutas
       precompress: false
     }),
     paths: {
-      base: process.env.NODE_ENV === 'production' ? '/proyecto-interfaces' : ''
+      base: process.env.NODE_ENV === 'production' ? '/proyecto-interfaces' : '',
+      relative: false
     },
-    appDir: 'internal'
+    appDir: 'internal',
+    prerender: {
+      entries: [
+        '/',
+        '/graficos'
+      ]
+    }
   }
 };
 

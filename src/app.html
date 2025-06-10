@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link rel="stylesheet" href="%sveltekit.assets%/app.css" />
-    <link rel="stylesheet" href="%sveltekit.assets%/katex/katex.min.css" />
-    <script src="%sveltekit.assets%/katex/katex.min.js"></script>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link rel="icon" href="%sveltekit.assets%/uno.ico" />
-    <link rel="apple-touch-icon" href="%sveltekit.assets%/pwa-192x192.png" />
 
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="Superficies3D" />
-    <meta name="theme-color" content="#ffffff" />
+  <link rel="stylesheet" href="%sveltekit.assets%/katex/katex.min.css" />
+  <script src="%sveltekit.assets%/katex/katex.min.js"></script>
 
-    
+  <link rel="icon" href="%sveltekit.assets%/uno.ico" />
+  <link rel="apple-touch-icon" href="%sveltekit.assets%/pwa-192x192.png" />
 
-    %sveltekit.head%
-  </head>
-  <body>
-    <div style="display: contents">%sveltekit.body%</div>
-  </body>
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-status-bar-style" content="black" />
+  <meta name="mobile-web-app-title" content="Superficies3D" />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
+
+
+
+  %sveltekit.head%
+</head>
+
+<body>
+  <div style="display: contents">%sveltekit.body%</div>
+</body>
+
 </html>
