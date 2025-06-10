@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f7f7f7;
+  color: #333;
+  padding: 1rem;
+}
+
+h1 {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.plot-container {
+  width: 100%;
+  max-width: 900px;
+  height: 500px;
+  margin: auto;
+  border: 1px solid #ccc;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+form > * {
+  margin-right: 1rem;
+}
+
+input,
+select {
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+button {
+  padding: 0.4rem 0.8rem;
+  font-weight: bold;
+  background-color: #007acc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
