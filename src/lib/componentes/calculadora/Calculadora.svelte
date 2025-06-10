@@ -5,105 +5,118 @@
   import OutputPanel from './OutputPanel.svelte';
   
   let expresion = '';
-  let latexPreview = '';
-  let latexResult = '';
-  let error = '';
-  let operationType = '';
+  let calculationResult = null;
   
-  $: if (expresion.trim() === '') {
-    latexPreview = '';
-    latexResult = '';
-    error = '';
-    operationType = '';
-  } else {
+  // Función que calcula todo de una vez
+  function calculateExpression(expr) {
+    if (!expr || expr.trim() === '') {
+      return null;
+    }
+    
     try {
-      error = '';
-      // Detectar si es integral, derivada o nuevas abreviaturas
-      const trimmed = expresion.trim();
+      const trimmed = expr.trim();
+      let preview = '';
+      let result = '';
+      let type = '';
+      
       if (trimmed.startsWith('intd ')) {
-        operationType = 'definite-integral';
-        // integral definida: intd f, a, b
-        // separo la función y los límites
+        type = 'definite-integral';
         const args = trimmed.slice(5).split(',').map(s => s.trim());
         if (args.length === 3) {
           const [f, a, b] = args;
-          latexPreview = `\\int_{${a}}^{${b}} ${Algebrite.run(`printlatex(${f})`)}\\,dx`;
-          latexResult = Algebrite.run(`printlatex(defint(${f}, x, ${a}, ${b}))`);
+          preview = `\\int_{${a}}^{${b}} ${Algebrite.run(`printlatex(${f})`)}\\,dx`;
+          result = Algebrite.run(`printlatex(defint(${f}, x, ${a}, ${b}))`);
         } else {
           throw new Error("Formato intd: intd función, límite_inferior, límite_superior");
         }
       } else if (trimmed.startsWith('int ')) {
-        operationType = 'indefinite-integral';
+        type = 'indefinite-integral';
         const inner = trimmed.slice(4);
-        latexPreview = `\\int ${Algebrite.run(`printlatex(${inner})`)}\\,dx`;
-        // Agregar + C a las integrales indefinidas
+        preview = `\\int ${Algebrite.run(`printlatex(${inner})`)}\\,dx`;
         const integralResult = Algebrite.run(`printlatex(integral(${inner}))`);
-        latexResult = integralResult + ' + C';
+        result = integralResult + ' + C';
       } else if (trimmed.startsWith('derp ')) {
-        operationType = 'partial-derivative';
-        // derivada parcial: derp f, var
+        type = 'partial-derivative';
         const args = trimmed.slice(5).split(',').map(s => s.trim());
         if (args.length === 2) {
           const [f, v] = args;
-          latexPreview = `\\frac{\\partial}{\\partial ${v}} ${Algebrite.run(`printlatex(${f})`)}`;
-          latexResult = Algebrite.run(`printlatex(derivative(${f}, ${v}))`);
+          preview = `\\frac{\\partial}{\\partial ${v}} ${Algebrite.run(`printlatex(${f})`)}`;
+          result = Algebrite.run(`printlatex(derivative(${f}, ${v}))`);
         } else {
           throw new Error("Formato derp: derp función, variable");
         }
       } else if (trimmed.startsWith('der ') || trimmed.startsWith('diff ')) {
-        operationType = 'derivative';
+        type = 'derivative';
         const inner = trimmed.replace(/^(der|diff)\s+/, '');
-        latexPreview = `\\frac{d}{dx} ${Algebrite.run(`printlatex(${inner})`)}`;
-        latexResult = Algebrite.run(`printlatex(derivative(${inner}))`);
+        preview = `\\frac{d}{dx} ${Algebrite.run(`printlatex(${inner})`)}`;
+        result = Algebrite.run(`printlatex(derivative(${inner}))`);
       } else {
-        operationType = 'evaluation';
-        // Evaluación normal
-        const node = parse(expresion);
-        latexPreview = node.toTex(); // Notación matemática original
-        const evaluated = evaluate(expresion);
-        latexResult = '\\mathrm{' + evaluated.toString() + '}';
+        type = 'evaluation';
+        const node = parse(expr);
+        preview = node.toTex();
+        const evaluated = evaluate(expr);
+        result = '\\mathrm{' + evaluated.toString() + '}';
       }
+      
+      return {
+        preview,
+        result,
+        type,
+        error: null
+      };
+      
     } catch (e) {
-      latexPreview = '';
-      latexResult = '';
-      error = e.message;
-      operationType = '';
+      return {
+        preview: '',
+        result: '',
+        type: 'error',
+        error: e.message
+      };
     }
   }
+  
+  // Solo una reactive declaration
+  $: calculationResult = calculateExpression(expresion);
 
   function getOperationIcon(type) {
+    if (!type) return '🧮';
     switch(type) {
       case 'indefinite-integral': return '∫';
       case 'definite-integral': return '∫ᵇₐ';
       case 'derivative': return 'd/dx';
       case 'partial-derivative': return '∂/∂x';
       case 'evaluation': return '=';
+      case 'error': return '⚠️';
       default: return '🧮';
     }
   }
 
   function getOperationName(type) {
+    if (!type) return 'Calculadora Simbólica';
     switch(type) {
       case 'indefinite-integral': return 'Integral Indefinida';
       case 'definite-integral': return 'Integral Definida';
       case 'derivative': return 'Derivada';
       case 'partial-derivative': return 'Derivada Parcial';
       case 'evaluation': return 'Evaluación';
+      case 'error': return 'Error';
       default: return 'Calculadora Simbólica';
     }
   }
 </script>
 
 <div class="calculator-component">
+  <!-- Header -->
   <div class="calculator-header">
     <div class="header-icon">
-      {getOperationIcon(operationType)}
+      {getOperationIcon(calculationResult?.type)}
     </div>
     <h2 class="header-title">
-      {getOperationName(operationType)}
+      {getOperationName(calculationResult?.type)}
     </h2>
   </div>
 
+  <!-- Input Section -->
   <div class="input-section">
     <div class="section-header">
       <span class="section-icon">✏️</span>
@@ -112,38 +125,48 @@
     <InputPanel bind:expresion />
   </div>
 
-  {#if expresion.trim() !== ''}
-    <div class="preview-section">
-      <div class="section-header">
-        <span class="section-icon">👁️</span>
-        <h3 class="section-title">Previsualización</h3>
-      </div>
-      <div class="output-container preview">
-        <OutputPanel latex={latexPreview} />
-      </div>
-    </div>
-
-    <div class="result-section">
-      <div class="section-header">
-        <span class="section-icon">✨</span>
-        <h3 class="section-title">Resultado</h3>
-      </div>
-      
-      {#if error}
+  <!-- Results Section -->
+  {#if calculationResult}
+    {#if calculationResult.error}
+      <!-- Error State -->
+      <div class="result-section error">
+        <div class="section-header">
+          <span class="section-icon">⚠️</span>
+          <h3 class="section-title">Error</h3>
+        </div>
         <div class="error-container">
           <div class="error-icon">⚠️</div>
           <div class="error-content">
             <p class="error-title">Error de sintaxis</p>
-            <p class="error-message">{error}</p>
+            <p class="error-message">{calculationResult.error}</p>
           </div>
         </div>
-      {:else}
-        <div class="output-container result">
-          <OutputPanel latex={latexResult} />
+      </div>
+    {:else}
+      <!-- Preview Section -->
+      <div class="preview-section">
+        <div class="section-header">
+          <span class="section-icon">👁️</span>
+          <h3 class="section-title">Previsualización</h3>
         </div>
-      {/if}
-    </div>
+        <div class="output-container preview">
+          <OutputPanel latex={calculationResult.preview} />
+        </div>
+      </div>
+
+      <!-- Result Section -->
+      <div class="result-section success">
+        <div class="section-header">
+          <span class="section-icon">✨</span>
+          <h3 class="section-title">Resultado</h3>
+        </div>
+        <div class="output-container result">
+          <OutputPanel latex={calculationResult.result} />
+        </div>
+      </div>
+    {/if}
   {:else}
+    <!-- Empty State -->
     <div class="empty-state">
       <div class="empty-icon">📝</div>
       <p class="empty-title">Ingresa una expresión matemática</p>
@@ -205,9 +228,14 @@
     border-color: #cbd5e1;
   }
 
-  .result-section {
+  .result-section.success {
     background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
     border-color: #a7f3d0;
+  }
+
+  .result-section.error {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #fca5a5;
   }
 
   .section-header {
@@ -227,16 +255,6 @@
     margin: 0;
     color: #374151;
   }
-
-/*   .constant-note {
-    background: #fef3c7;
-    color: #92400e;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border: 1px solid #fcd34d;
-  } */
 
   /* Output containers */
   .output-container {

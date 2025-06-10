@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import '../app.css';
+  
  
  
   // Opcional: volver arriba tras navegación
