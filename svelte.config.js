@@ -12,7 +12,7 @@ const config = {
       precompress: false
     }),
     paths: {
-      base: process.env.NODE_ENV === 'production' ? '/nombre-del-repo' : ''
+      base: process.env.NODE_ENV === 'production' ? '/proyecto-interfaces' : ''
     },
     appDir: 'internal'
   }
