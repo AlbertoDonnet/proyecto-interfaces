@@ -8,7 +8,7 @@ const config = {
     adapter: adapter({
       pages: 'docs',
       assets: 'docs',
-      fallback: '404.html',
+      fallback: 'index.html',
       precompress: false
     }),
     paths: {
@@ -17,11 +17,11 @@ const config = {
     },
     appDir: 'internal',
     prerender: {
-      entries: [
-        '*', 
-      ]
+      
+      entries: ['/', '/graficos']
     }
   }
+
 };
 
 export default config;

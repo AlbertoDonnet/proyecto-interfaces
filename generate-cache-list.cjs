@@ -2,11 +2,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const buildDir = './build'; // carpeta donde está el build estático
+const buildDir = './docs'; // carpeta donde está el build estático
 const outputFile = './src/service-worker-cache-list.js'; // archivo que importa sw.js
 
 // NUEVA variable para copiar también dentro del build final
-const DEST_PATH_BUILD = './build/service-worker-cache-list.js'; 
+const DEST_PATH_BUILD = './docs/service-worker-cache-list.js'; 
 
 function walkDir(dir, baseDir = dir) {
   let files = [];
