@@ -7,7 +7,6 @@ importScripts('./service-worker-cache-list.js');
 // Agrega manualmente recursos que deben estar sí o sí cacheados
 const manualCache = [
   './',
-  './graficos',
   './manifest.webmanifest',
   './offline.html',
   './pwa-192x192.png',
@@ -78,11 +77,12 @@ self.addEventListener('fetch', event => {
       });
 
     }).catch(() => {
-      // Si es navegación y falla, responder con offline.html
+      // ESTA ES LA PARTE CRÍTICA: responde con './' si es navegación
       if (event.request.mode === 'navigate') {
-        return caches.match('./offline.html');
+        return caches.match('./');
       }
-      return new Response('', { status: 503, statusText: 'Offline' });
+      return caches.match('./offline.html') || new Response('', { status: 503, statusText: 'Offline' });
     })
   );
 });
+

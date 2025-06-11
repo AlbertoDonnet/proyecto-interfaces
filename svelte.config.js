@@ -8,7 +8,7 @@ const config = {
     adapter: adapter({
       pages: 'build',
       assets: 'build',
-      fallback: 'index.html', // Necesario para el manejo de rutas
+      fallback: '404.html',
       precompress: false
     }),
     paths: {
@@ -18,8 +18,7 @@ const config = {
     appDir: 'internal',
     prerender: {
       entries: [
-        '/',
-        '/graficos'
+        '*', 
       ]
     }
   }
