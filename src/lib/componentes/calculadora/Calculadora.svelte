@@ -1,106 +1,196 @@
 <script>
-  import { evaluate, parse } from 'mathjs';
-  import Algebrite from 'algebrite';
-  import InputPanel from './InputPanel.svelte';
-  import OutputPanel from './OutputPanel.svelte';
-  
-  let expresion = '';
+  import { evaluate, parse } from "mathjs";
+  import Algebrite from "algebrite";
+  import InputPanel from "./InputPanel.svelte";
+  import OutputPanel from "./OutputPanel.svelte";
+
+  let expresion = "";
   let calculationResult = null;
-  
-  // Función que calcula todo de una vez
-  function calculateExpression(expr) {
-    if (!expr || expr.trim() === '') {
+  let isCalculating = false;
+  let debounceTimer = null;
+
+  // Función para preprocesar expresiones matemáticas
+  function preprocessExpression(expr) {
+    let processed = expr.trim();
+    processed = processed.replace(/(\d)([a-zA-Z])/g, "$1*$2");
+    return processed;
+  }
+
+  // Función que calcula todo de una vez (ahora asíncrona)
+  async function calculateExpression(expr) {
+    if (!expr || expr.trim() === "") {
       return null;
     }
-    
-    try {
-      const trimmed = expr.trim();
-      let preview = '';
-      let result = '';
-      let type = '';
-      
-      if (trimmed.startsWith('intd ')) {
-        type = 'definite-integral';
-        const args = trimmed.slice(5).split(',').map(s => s.trim());
-        if (args.length === 3) {
-          const [f, a, b] = args;
-          preview = `\\int_{${a}}^{${b}} ${Algebrite.run(`printlatex(${f})`)}\\,dx`;
-          result = Algebrite.run(`printlatex(defint(${f}, x, ${a}, ${b}))`);
-        } else {
-          throw new Error("Formato intd: intd función, límite_inferior, límite_superior");
+
+    // Envolver en Promise para hacer asíncrono
+    return new Promise((resolve) => {
+      // Usar setTimeout para no bloquear la UI
+      setTimeout(() => {
+        try {
+          const trimmed = expr.trim();
+          let preview = "";
+          let result = "";
+          let type = "";
+
+          if (trimmed.startsWith("intd ")) {
+            type = "definite-integral";
+            const args = trimmed
+              .slice(5)
+              .split(",")
+              .map((s) => s.trim());
+            if (args.length === 3) {
+              const [f, a, b] = args;
+              const processedF = preprocessExpression(f);
+
+              let latexF = f.replace(/\*/g, "").replace(/\^(\w+)/g, "^{$1}");
+              preview = `\\int_{${a}}^{${b}} ${latexF}\\,dx`;
+
+              result = Algebrite.run(
+                `printlatex(defint(${processedF}, x, ${a}, ${b}))`,
+              );
+            } else {
+              throw new Error(
+                "Formato intd: intd función, límite_inferior, límite_superior",
+              );
+            }
+          } else if (trimmed.startsWith("int ")) {
+            type = "indefinite-integral";
+            const inner = trimmed.slice(4);
+            const processedInner = preprocessExpression(inner);
+
+            let latexInner = inner.replace(/\*/g, "").replace(/\^(\w+)/g, "^{$1}");
+            preview = `\\int ${latexInner}\\,dx`;
+
+            result =
+              Algebrite.run(`printlatex(integral(${processedInner}))`) + " + C";
+          } else if (trimmed.startsWith("derp ")) {
+            type = "partial-derivative";
+            const args = trimmed
+              .slice(5)
+              .split(",")
+              .map((s) => s.trim());
+            if (args.length === 2) {
+              const [f, v] = args;
+              const processedF = preprocessExpression(f);
+
+              let latexF = f.replace(/\*/g, "").replace(/\^(\w+)/g, "^{$1}");
+              preview = `\\frac{\\partial}{\\partial ${v}} ${latexF}`;
+
+              result = Algebrite.run(`printlatex(derivative(${processedF}, ${v}))`);
+            } else {
+              throw new Error("Formato derp: derp función, variable");
+            }
+          } else if (trimmed.startsWith("der ") || trimmed.startsWith("diff ")) {
+            type = "derivative";
+            const inner = trimmed.replace(/^(der|diff)\s+/, "");
+            const processedInner = preprocessExpression(inner);
+
+            let latexInner = inner.replace(/\*/g, "").replace(/\^(\w+)/g, "^{$1}");
+            preview = `\\frac{d}{dx} ${latexInner}`;
+
+            result = Algebrite.run(`printlatex(derivative(${processedInner}))`);
+          } else {
+            type = "evaluation";
+            const processed = preprocessExpression(expr);
+            const node = parse(processed);
+            preview = node.toTex();
+            const evaluated = evaluate(processed);
+            result = "\\mathrm{" + evaluated.toString() + "}";
+          }
+
+          resolve({
+            preview,
+            result,
+            type,
+            error: null,
+          });
+        } catch (e) {
+          resolve({
+            preview: "",
+            result: "",
+            type: "error",
+            error: e.message,
+          });
         }
-      } else if (trimmed.startsWith('int ')) {
-        type = 'indefinite-integral';
-        const inner = trimmed.slice(4);
-        preview = `\\int ${Algebrite.run(`printlatex(${inner})`)}\\,dx`;
-        const integralResult = Algebrite.run(`printlatex(integral(${inner}))`);
-        result = integralResult + ' + C';
-      } else if (trimmed.startsWith('derp ')) {
-        type = 'partial-derivative';
-        const args = trimmed.slice(5).split(',').map(s => s.trim());
-        if (args.length === 2) {
-          const [f, v] = args;
-          preview = `\\frac{\\partial}{\\partial ${v}} ${Algebrite.run(`printlatex(${f})`)}`;
-          result = Algebrite.run(`printlatex(derivative(${f}, ${v}))`);
-        } else {
-          throw new Error("Formato derp: derp función, variable");
-        }
-      } else if (trimmed.startsWith('der ') || trimmed.startsWith('diff ')) {
-        type = 'derivative';
-        const inner = trimmed.replace(/^(der|diff)\s+/, '');
-        preview = `\\frac{d}{dx} ${Algebrite.run(`printlatex(${inner})`)}`;
-        result = Algebrite.run(`printlatex(derivative(${inner}))`);
-      } else {
-        type = 'evaluation';
-        const node = parse(expr);
-        preview = node.toTex();
-        const evaluated = evaluate(expr);
-        result = '\\mathrm{' + evaluated.toString() + '}';
-      }
-      
-      return {
-        preview,
-        result,
-        type,
-        error: null
-      };
-      
-    } catch (e) {
-      return {
-        preview: '',
-        result: '',
-        type: 'error',
-        error: e.message
-      };
-    }
+      }, 0);
+    });
   }
-  
-  // Solo una reactive declaration
-  $: calculationResult = calculateExpression(expresion);
+
+  // Función con debounce para evitar cálculos excesivos
+  async function debouncedCalculate(expr) {
+    // Limpiar timer anterior
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // Si la expresión está vacía, limpiar resultado inmediatamente
+    if (!expr || expr.trim() === "") {
+      calculationResult = null;
+      isCalculating = false;
+      return;
+    }
+
+    // Mostrar estado de carga
+    isCalculating = true;
+
+    // Configurar nuevo timer
+    debounceTimer = setTimeout(async () => {
+      try {
+        const result = await calculateExpression(expr);
+        calculationResult = result;
+      } catch (error) {
+        calculationResult = {
+          preview: "",
+          result: "",
+          type: "error",
+          error: "Error inesperado: " + error.message,
+        };
+      } finally {
+        isCalculating = false;
+      }
+    }, 500); // Esperar 500ms después de que el usuario deje de tipear
+  }
+
+  // Reactividad con debounce
+  $: debouncedCalculate(expresion);
 
   function getOperationIcon(type) {
-    if (!type) return '🧮';
-    switch(type) {
-      case 'indefinite-integral': return '∫';
-      case 'definite-integral': return '∫ᵇₐ';
-      case 'derivative': return 'd/dx';
-      case 'partial-derivative': return '∂/∂x';
-      case 'evaluation': return '=';
-      case 'error': return '⚠️';
-      default: return '🧮';
+    if (!type) return "🧮";
+    switch (type) {
+      case "indefinite-integral":
+        return "∫";
+      case "definite-integral":
+        return "∫ᵇₐ";
+      case "derivative":
+        return "d/dx";
+      case "partial-derivative":
+        return "∂/∂x";
+      case "evaluation":
+        return "=";
+      case "error":
+        return "⚠️";
+      default:
+        return "🧮";
     }
   }
 
   function getOperationName(type) {
-    if (!type) return 'Calculadora Simbólica';
-    switch(type) {
-      case 'indefinite-integral': return 'Integral Indefinida';
-      case 'definite-integral': return 'Integral Definida';
-      case 'derivative': return 'Derivada';
-      case 'partial-derivative': return 'Derivada Parcial';
-      case 'evaluation': return 'Evaluación';
-      case 'error': return 'Error';
-      default: return 'Calculadora Simbólica';
+    if (!type) return "Calculadora Simbólica";
+    switch (type) {
+      case "indefinite-integral":
+        return "Integral Indefinida";
+      case "definite-integral":
+        return "Integral Definida";
+      case "derivative":
+        return "Derivada";
+      case "partial-derivative":
+        return "Derivada Parcial";
+      case "evaluation":
+        return "Evaluación";
+      case "error":
+        return "Error";
+      default:
+        return "Calculadora Simbólica";
     }
   }
 </script>
@@ -121,12 +211,30 @@
     <div class="section-header">
       <span class="section-icon">✏️</span>
       <h3 class="section-title">Expresión</h3>
+      {#if isCalculating}
+        <div class="loading-indicator">
+          <div class="spinner"></div>
+          <span class="loading-text">Calculando...</span>
+        </div>
+      {/if}
     </div>
     <InputPanel bind:expresion />
   </div>
 
   <!-- Results Section -->
-  {#if calculationResult}
+  {#if isCalculating}
+    <!-- Loading State -->
+    <div class="loading-section">
+      <div class="section-header">
+        <span class="section-icon">⏳</span>
+        <h3 class="section-title">Procesando</h3>
+      </div>
+      <div class="loading-container">
+        <div class="spinner-large"></div>
+        <p class="loading-message">Calculando expresión matemática...</p>
+      </div>
+    </div>
+  {:else if calculationResult}
     {#if calculationResult.error}
       <!-- Error State -->
       <div class="result-section error">
@@ -170,7 +278,9 @@
     <div class="empty-state">
       <div class="empty-icon">📝</div>
       <p class="empty-title">Ingresa una expresión matemática</p>
-      <p class="empty-subtitle">Usa los comandos del panel de instrucciones arriba</p>
+      <p class="empty-subtitle">
+        Usa los comandos del panel de instrucciones arriba
+      </p>
     </div>
   {/if}
 </div>
@@ -205,6 +315,62 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
+  }
+
+  /* Loading indicator */
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+
+  .loading-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .spinner-large {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Loading section */
+  .loading-section {
+    background: linear-gradient(135deg, #fef7ff 0%, #f3e8ff 100%);
+    border: 2px solid #e9d5ff;
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+
+  .loading-container {
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .loading-message {
+    margin: 1rem 0 0 0;
+    color: #7c3aed;
+    font-weight: 500;
   }
 
   /* Sections */
@@ -360,7 +526,8 @@
 
     .input-section,
     .preview-section,
-    .result-section {
+    .result-section,
+    .loading-section {
       padding: 1rem;
     }
 
@@ -368,6 +535,11 @@
       flex-wrap: wrap;
       justify-content: center;
       text-align: center;
+    }
+
+    .loading-indicator {
+      margin-left: 0;
+      margin-top: 0.5rem;
     }
 
     .output-container {
