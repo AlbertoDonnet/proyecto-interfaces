@@ -6,9 +6,13 @@
 	"scripts": {
 		"dev": "vite dev",
 		"generate-cache": "node generate-cache-list.cjs",
-		"build": "vite build && npm run generate-cache",
-		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''"
+		"clean": "if exist docs rmdir /s /q docs",
+		"build": "cross-env NODE_ENV=production vite build",
+		"postbuild": "npm run generate-cache",
+		"preview": "cross-env VITE_PREVIEW_MODE=true vite preview",
+		"prepare": "svelte-kit sync || echo \"\"",
+		"full-build": "npm run clean && npm run build",
+		"deploy:gh": "npm run full-build && copy docs\\index.html docs\\404.html"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.0.0",
@@ -16,6 +20,7 @@
 		"@sveltejs/kit": "^2.21.2",
 		"@sveltejs/vite-plugin-svelte": "^5.1.0",
 		"@vite-pwa/sveltekit": "^1.0.0",
+		"cross-env": "^7.0.3",
 		"svelte": "^5.0.0",
 		"tailwindcss": "^4.1.8",
 		"vite": "^6.2.6",

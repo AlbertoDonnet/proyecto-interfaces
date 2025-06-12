@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { browser } from "$app/environment";
     import Superficies3D from "$lib/componentes/graficos/Superficies3DPlot.svelte";
-    import '../../styles/graphs.css';
+    import "../../styles/graphs.css";
 
     // Variables para Superficies 3D
     let zData = [];
@@ -276,7 +276,7 @@
                         </div>
 
                         <div class="examples-section">
-                            <label>Ejemplos:</label>
+                            <label for="examples-label">Ejemplos:</label>
                             <div class="examples-grid">
                                 {#each customExamples as example}
                                     <button
@@ -295,11 +295,24 @@
                     <div class="parameters-grid">
                         {#if formula === "sombrero"}
                             <div class="param-group">
-                                <label
-                                    >Amplitud: {parameters.sombrero.amplitude.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="sombrero-amplitude"
+                                        >Amplitud: {parameters.sombrero.amplitude.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="sombrero-amplitude"
+                                        type="range"
+                                        bind:value={
+                                            parameters.sombrero.amplitude
+                                        }
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.sombrero.amplitude}
@@ -310,11 +323,24 @@
                                 />
                             </div>
                             <div class="param-group">
-                                <label
-                                    >Frecuencia: {parameters.sombrero.frequency.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="sombrero-frequency"
+                                        >Frecuencia: {parameters.sombrero.frequency.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="sombrero-frequency"
+                                        type="range"
+                                        bind:value={
+                                            parameters.sombrero.frequency
+                                        }
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.sombrero.frequency}
@@ -328,11 +354,22 @@
 
                         {#if formula === "coseno"}
                             <div class="param-group">
-                                <label
-                                    >Amplitud: {parameters.coseno.amplitude.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="coseno-amplitude"
+                                        >Amplitud: {parameters.coseno.amplitude.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="coseno-amplitude"
+                                        type="range"
+                                        bind:value={parameters.coseno.amplitude}
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.coseno.amplitude}
@@ -343,11 +380,22 @@
                                 />
                             </div>
                             <div class="param-group">
-                                <label
-                                    >Frecuencia: {parameters.coseno.frequency.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="coseno-frequency"
+                                        >Frecuencia: {parameters.coseno.frequency.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="coseno-frequency"
+                                        type="range"
+                                        bind:value={parameters.coseno.frequency}
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.coseno.frequency}
@@ -361,11 +409,22 @@
 
                         {#if formula === "ondas"}
                             <div class="param-group">
-                                <label
-                                    >Amplitud: {parameters.ondas.amplitude.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="ondas-amplitude"
+                                        >Amplitud: {parameters.ondas.amplitude.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="ondas-amplitude"
+                                        type="range"
+                                        bind:value={parameters.ondas.amplitude}
+                                        min="0.1"
+                                        max="2"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.ondas.amplitude}
@@ -376,11 +435,22 @@
                                 />
                             </div>
                             <div class="param-group">
-                                <label
-                                    >Frecuencia: {parameters.ondas.frequency.toFixed(
-                                        1,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="ondas-frequency"
+                                        >Frecuencia: {parameters.ondas.frequency.toFixed(
+                                            1,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="ondas-frequency"
+                                        type="range"
+                                        bind:value={parameters.ondas.frequency}
+                                        min="1"
+                                        max="8"
+                                        step="0.5"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.ondas.frequency}
@@ -391,11 +461,22 @@
                                 />
                             </div>
                             <div class="param-group">
-                                <label
-                                    >Separación: {parameters.ondas.separation.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="ondas-separation"
+                                        >Separación: {parameters.ondas.separation.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="ondas-separation"
+                                        type="range"
+                                        bind:value={parameters.ondas.separation}
+                                        min="0.5"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.ondas.separation}
@@ -409,11 +490,24 @@
 
                         {#if formula === "gaussiana"}
                             <div class="param-group">
-                                <label
-                                    >Amplitud: {parameters.gaussiana.amplitude.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="gaussiana-amplitude"
+                                        >Amplitud: {parameters.gaussiana.amplitude.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="gaussiana-amplitude"
+                                        type="range"
+                                        bind:value={
+                                            parameters.gaussiana.amplitude
+                                        }
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.gaussiana.amplitude}
@@ -424,11 +518,22 @@
                                 />
                             </div>
                             <div class="param-group">
-                                <label
-                                    >Dispersión: {parameters.gaussiana.spread.toFixed(
-                                        1,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="gaussiana-spread"
+                                        >Dispersión: {parameters.gaussiana.spread.toFixed(
+                                            1,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="gaussiana-spread"
+                                        type="range"
+                                        bind:value={parameters.gaussiana.spread}
+                                        min="0.5"
+                                        max="5"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.gaussiana.spread}
@@ -442,11 +547,24 @@
 
                         {#if formula === "paraboloide"}
                             <div class="param-group">
-                                <label
-                                    >Curvatura: {parameters.paraboloide.curvature.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="paraboloide-curvature"
+                                        >Curvatura: {parameters.paraboloide.curvature.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="paraboloide-curvature"
+                                        type="range"
+                                        bind:value={
+                                            parameters.paraboloide.curvature
+                                        }
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={
@@ -459,11 +577,24 @@
                                 />
                             </div>
                             <div class="param-group">
-                                <label
-                                    >Offset: {parameters.paraboloide.offset.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="paraboloide-offset"
+                                        >Offset: {parameters.paraboloide.offset.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="paraboloide-offset"
+                                        type="range"
+                                        bind:value={
+                                            parameters.paraboloide.offset
+                                        }
+                                        min="-2"
+                                        max="2"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.paraboloide.offset}
@@ -477,11 +608,22 @@
 
                         {#if formula === "silla"}
                             <div class="param-group">
-                                <label
-                                    >Curvatura X: {parameters.silla.curvatureX.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="silla-curvatureX"
+                                        >Curvatura X: {parameters.silla.curvatureX.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="silla-curvatureX"
+                                        type="range"
+                                        bind:value={parameters.silla.curvatureX}
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.silla.curvatureX}
@@ -492,11 +634,22 @@
                                 />
                             </div>
                             <div class="param-group">
-                                <label
-                                    >Curvatura Y: {parameters.silla.curvatureY.toFixed(
-                                        2,
-                                    )}</label
-                                >
+                                <div class="param-group">
+                                    <label for="silla-curvatureY"
+                                        >Curvatura Y: {parameters.silla.curvatureY.toFixed(
+                                            2,
+                                        )}</label
+                                    >
+                                    <input
+                                        id="silla-curvatureY"
+                                        type="range"
+                                        bind:value={parameters.silla.curvatureY}
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        disabled={isGenerating}
+                                    />
+                                </div>
                                 <input
                                     type="range"
                                     bind:value={parameters.silla.curvatureY}

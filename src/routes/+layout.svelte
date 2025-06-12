@@ -5,16 +5,20 @@
   import { base } from "$app/paths";
 
   //REGISTRO DEL SERVICE WORKER
-  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register(`${base}/sw.js`)
-      .then((registration) => {
-        console.log("Service Worker registrado:", registration);
-      })
-      .catch((error) => {
-        console.error("Error al registrar Service Worker:", error);
-      });
-  }
+  onMount(() => {
+    if ('serviceWorker' in navigator) {
+      const swUrl = `${base}/sw.js`;
+      
+      navigator.serviceWorker.register(swUrl)
+        .then(reg => {
+          console.log('Service Worker registrado:', reg);
+          reg.update(); // Fuerza actualización
+        })
+        .catch(err => {
+          console.error('Error al registrar SW:', err);
+        });
+    }
+  });
 
   // Opcional: volver arriba tras navegación
   onMount(() => {

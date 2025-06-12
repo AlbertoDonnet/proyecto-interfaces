@@ -1,8 +1,12 @@
 const CACHE_NAME = 'calculadora-v1';
 
-// Importa la lista generada automáticamente como una variable global en el scope del service worker
-importScripts('./service-worker-cache-list.js'); 
-// Este archivo debe definir: self.urlsToCache = [...] (NO export)
+// Intenta cargar la lista de caché, pero no falles si no existe
+try {
+  importScripts('./service-worker-cache-list.js');
+} catch (e) {
+  console.warn('No se pudo cargar service-worker-cache-list.js', e);
+  self.urlsToCache = [];
+}
 
 // Agrega manualmente recursos que deben estar sí o sí cacheados
 const manualCache = [
@@ -11,15 +15,11 @@ const manualCache = [
   './offline.html',
   './pwa-192x192.png',
   './pwa-512x512.png',
-  
-  // Agrega aquí rutas de páginas que quieras cachear (aunque no sean archivos estáticos)
-  './about',
-  './contacto',
-  './otra-ruta',
 ];
 
 // Combina ambas listas (manual + generada dinámicamente)
-const urlsToCache = Array.from(new Set([...manualCache, ...self.urlsToCache]));
+const combinedUrlsToCache = Array.isArray(self.urlsToCache) ? self.urlsToCache : [];
+const urlsToCache = Array.from(new Set([...manualCache, ...combinedUrlsToCache]));
 
 // Evento install: abre el cache y guarda los recursos
 self.addEventListener('install', event => {
