@@ -1,8 +1,9 @@
 const CACHE_NAME = 'calculadora-v1';
+const APP_BASE_PATH = '/proyecto-interfaces';
 
 // Intenta cargar la lista de caché, pero no falles si no existe
 try {
-  importScripts('./service-worker-cache-list.js');
+  importScripts(`${APP_BASE_PATH}/service-worker-cache-list.js`);
 } catch (e) {
   console.warn('No se pudo cargar service-worker-cache-list.js', e);
   self.urlsToCache = [];

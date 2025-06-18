@@ -20,7 +20,7 @@
     }
   });
 
-  // Opcional: volver arriba tras navegación
+  // volver arriba tras navegación
   onMount(() => {
     afterNavigate(() => window.scrollTo(0, 0));
   });
