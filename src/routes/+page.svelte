@@ -11,7 +11,7 @@
           <span class="title-icon">🧮</span>
           Calculadora Simbólica
         </h1>
-        <a href="/graficos" class="nav-link">
+        <a href="/proyecto-interfaces/graficos" class="nav-link">
           <span class="nav-icon">📊</span>
           Ir a Gráficos
         </a>
