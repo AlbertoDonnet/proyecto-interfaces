@@ -187,7 +187,7 @@
                     Superficies 3D
                 </h1>
                 <nav class="header-nav">
-                    <a href="/" class="nav-link">
+                    <a href="/proyecto-interfaces" class="nav-link">
                         <span class="nav-icon">🧮</span>
                         Calculadora
                     </a>
